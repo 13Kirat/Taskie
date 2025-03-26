@@ -1,39 +1,53 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+import AuthProvider from './context/AuthContext';
+import TaskProvider from './context/TaskContext';
+import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Provider as PaperProvider } from 'react-native-paper';
+import authStorage from './services/authStorage';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+    // Check for authentication token on app load
+    const checkAuth = async () => {
+      try {
+        const token = await authStorage.getToken();
+        setIsAuthenticated(!!token);
+      } catch (error) {
+        // console.error('Error checking authentication:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  if (!loaded) {
+    checkAuth();
+  }, [isAuthenticated]);
+
+  if (isLoading) {
+    // Return a loading screen
     return null;
   }
 
-  return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+  return (isAuthenticated != undefined && isAuthenticated != null &&
+    <PaperProvider>
+      <AuthProvider>
+        <TaskProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            {!isAuthenticated ?
+              <Stack.Screen name="index" options={{ title: 'Login' }} />
+              :
+              <>
+                <Stack.Screen name="HomeScreen" options={{ title: 'Home' }} />
+                <Stack.Screen name="TaskDetailScreen" options={{ title: 'Task Details', headerShown: true }} />
+                <Stack.Screen name="UserManagementScreen" options={{ title: 'User Management' }} />
+              </>
+            }
+          </Stack>
+        </TaskProvider>
+      </AuthProvider>
+    </PaperProvider >
   );
 }
