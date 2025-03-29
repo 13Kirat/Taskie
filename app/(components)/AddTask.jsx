@@ -63,7 +63,7 @@ const AddTask = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View contentContainerStyle={styles.scrollContainer}>
         <Card style={styles.card}>
           <Card.Content>
             <Title style={styles.title}>Assign New Task</Title>
@@ -95,7 +95,7 @@ const AddTask = () => {
             </Button>
           </Card.Content>
         </Card>
-      </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 };

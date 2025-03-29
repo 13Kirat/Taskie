@@ -5,7 +5,8 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  Alert
+  Alert,
+  Text
 } from 'react-native';
 import {
   Card,
@@ -18,8 +19,6 @@ import {
   Divider
 } from 'react-native-paper';
 import * as ImagePicker from 'expo-image-picker';
-import TaskContext from './context/TaskContext';
-import AuthContext from './context/AuthContext';
 import { api } from './services/api'; // Fix import (remove destructuring)
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import authStorage from './services/authStorage';
@@ -182,19 +181,21 @@ const TaskDetailScreen = () => {
                 task.status === 'completed' ? styles.completedChip : styles.pendingChip
               ]}
             >
-              {task.status}
+              <Text style={{ color: '#000' }}>
+                {task.status}
+              </Text>
             </Chip>
           </View>
 
           <View style={styles.infoRow}>
             <Paragraph style={styles.label}>Assigned Date:</Paragraph>
-            <Paragraph>{formatDate(task.assignDate)}</Paragraph>
+            <Paragraph style={{ color: '#000' }}>{formatDate(task.assignDate)}</Paragraph>
           </View>
 
           {task.status === 'completed' && (
             <>
-              <Paragraph style={styles.sectionTitle}>Completion Notes:</Paragraph>
-              <Paragraph style={styles.note}>{task.note || 'No notes provided'}</Paragraph>
+              <Paragraph style={{ color: '#000', fontSize: 20 }}>Completion Notes:</Paragraph>
+              <Paragraph style={{ color: '#000' }}>{task.note || 'No notes provided'}</Paragraph>
             </>
           )}
         </Card.Content>
@@ -203,14 +204,14 @@ const TaskDetailScreen = () => {
       {task.images && task.images.length > 0 && (
         <Card style={styles.card}>
           <Card.Content>
-            <Paragraph style={styles.sectionTitle}>Task Images:</Paragraph>
+            <Paragraph style={{ color: '#000' }}>Task Images:</Paragraph>
             <ScrollView horizontal style={styles.imageScrollView}>
               {task.images.map((image, index) => (
                 <Image
                   key={index}
-                  source={{ uri: `${api.defaults.baseURL}/${image.replace(/\\/g, '/')}` }}
+                  source={{ uri: image }}
                   style={styles.taskImage}
-                  // onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
+                // onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
                 />
               ))}
             </ScrollView>
@@ -221,7 +222,7 @@ const TaskDetailScreen = () => {
       {task.status === 'pending' && (
         <Card style={styles.card}>
           <Card.Content>
-            <Paragraph style={styles.sectionTitle}>Complete Task:</Paragraph>
+            <Paragraph style={{ color: '#000' }}>Complete Task:</Paragraph>
 
             <TextInput
               label="Add completion note (optional)"
@@ -230,7 +231,8 @@ const TaskDetailScreen = () => {
               mode="outlined"
               multiline
               numberOfLines={4}
-              style={styles.noteInput}
+              contentStyle={{ color: "#000" }}
+              style={{ backgroundColor: '#fff', borderBlockColor: '#000' }}
             />
             <View style={styles.spacer}></View>
 
@@ -305,10 +307,12 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 16,
     elevation: 2,
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 22,
     marginBottom: 16,
+    color: "#000"
   },
   infoRow: {
     flexDirection: 'row',
@@ -318,6 +322,7 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: 'bold',
     marginRight: 8,
+    color: "#000"
   },
   statusChip: {
     height: 30,

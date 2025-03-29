@@ -7,12 +7,16 @@ export const TaskContext = createContext();
 
 export default TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
+  const [allTasks, setAllTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
     if (user) {
       fetchTasks();
+      if (user.isAdmin) {
+        fetchAllTasks();
+      }
     }
   }, [user]);
 
@@ -26,6 +30,23 @@ export default TaskProvider = ({ children }) => {
       setTasks(res.data);
     } catch (error) {
       // console.error('Error fetching tasks', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch "All Tasks" (Admin only)
+  const fetchAllTasks = async () => {
+    if (!user.isAdmin) return;
+    setLoading(true);
+    try {
+      const token = await authStorage.getToken();
+      const res = await api.get('/api/tasks/all', {
+        headers: { 'x-auth-token': token },
+      });
+      setAllTasks(res.data);
+    } catch (error) {
+      console.error('Error fetching all tasks:', error);
     } finally {
       setLoading(false);
     }
@@ -94,6 +115,7 @@ export default TaskProvider = ({ children }) => {
     }
   };
 
+
   return (
     <TaskContext.Provider
       value={{
@@ -102,7 +124,10 @@ export default TaskProvider = ({ children }) => {
         fetchTasks,
         createTask,
         completeTask,
-        setTasks
+        setTasks,
+        allTasks,
+        fetchAllTasks,
+        fetchTasks
       }}
     >
       {children}

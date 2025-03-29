@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Provider as PaperProvider } from 'react-native-paper';
 import authStorage from './services/authStorage';
-
+import StackLayout from './StackLayout';
 export default function RootLayout() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,9 +40,7 @@ export default function RootLayout() {
               <Stack.Screen name="index" options={{ title: 'Login' }} />
               :
               <>
-                <Stack.Screen name="HomeScreen" options={{ title: 'Home' }} />
-                <Stack.Screen name="TaskDetailScreen" options={{ title: 'Task Details', headerShown: true }} />
-                <Stack.Screen name="UserManagementScreen" options={{ title: 'User Management' }} />
+                <Stack.Screen name="StackLayout" />
               </>
             }
           </Stack>

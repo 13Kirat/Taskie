@@ -18,8 +18,8 @@ import { AuthContext } from './context/AuthContext';
 import { useRouter } from 'expo-router';
 
 const LoginScreen = () => {
-    const [email, setEmail] = useState('gs9965415@gmail.com');
-    const [password, setPassword] = useState('123456789');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [visible, setVisible] = useState(false);
@@ -41,7 +41,9 @@ const LoginScreen = () => {
                 setError(result.message);
                 setVisible(true);
             }
-            router.replace("/HomeScreen")
+            if (!!result.success) {
+                router.replace("/HomeScreen")
+            }
         } catch (error) {
             setError('An error occurred during login');
             setVisible(true);
@@ -75,6 +77,7 @@ const LoginScreen = () => {
                         mode="outlined"
                         style={styles.input}
                         autoCapitalize="none"
+                        contentStyle={{ color: "#000" }}
                         keyboardType="email-address"
                     />
 
@@ -84,6 +87,7 @@ const LoginScreen = () => {
                         onChangeText={setPassword}
                         mode="outlined"
                         style={styles.input}
+                        contentStyle={{ color: "#000" }}
                         secureTextEntry
                     />
 
@@ -93,6 +97,9 @@ const LoginScreen = () => {
                         style={styles.button}
                         loading={loading}
                         disabled={loading}
+                        customButtonColor="#fff"
+                        customTextColor="#000"
+                        dark='true'
                     >
                         Login
                     </Button>
@@ -132,21 +139,26 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         textAlign: 'center',
+        color: "#000"
     },
     subtitle: {
         fontSize: 16,
         textAlign: 'center',
         marginBottom: 20,
+        color: "#000"
     },
     formContainer: {
         width: '100%',
     },
     input: {
         marginBottom: 15,
+        backgroundColor: "#fff",
+        color: "#000"
     },
     button: {
         marginTop: 10,
         paddingVertical: 8,
+        backgroundColor:"#aaaaaa",
     },
 });
 

@@ -1,73 +1,122 @@
-import React, { useContext, useEffect } from 'react';
-import { View, StyleSheet, FlatList, Button } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { View, StyleSheet, FlatList, Button, useWindowDimensions } from 'react-native';
 import { FAB, ActivityIndicator, Text } from 'react-native-paper';
+import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 import { AuthContext } from './context/AuthContext';
 import { TaskContext } from './context/TaskContext';
 import TaskItem from './(components)/TaskItem';
 import { useRouter } from 'expo-router';
 
 const HomeScreen = () => {
+  const layout = useWindowDimensions();
   const { user, isAdmin, logout } = useContext(AuthContext);
-  const { tasks, loading, fetchTasks } = useContext(TaskContext);
+  const { tasks, loading, fetchTasks, fetchAllTasks, allTasks } = useContext(TaskContext);
   const navigation = useRouter();
-  // useEffect(() => {
-  //   router.setOptions({
-  //     headerRight: () => (
-  //       <Text
-  //         style={styles.logoutText}
-  //         onPress={logout}
-  //       >
-  //         Logout
-  //       </Text>
-  //     ),
-  //   });
-  // }, [navigation]);
 
-  const renderItem = ({ item }) => (
-    <TaskItem
-      task={item}
+  const [index, setIndex] = useState(0); // Current tab index
+  const [routes] = useState(
+    isAdmin
+      ? [
+        { key: 'yourTasks', title: 'Your Tasks' },
+        { key: 'allTasks', title: 'All Tasks' },
+      ]
+      : [{ key: 'yourTasks', title: 'Your Tasks' }]
+  );
+
+  // Fetch tasks based on the selected tab
+  useEffect(() => {
+    if (index === 0) {
+      fetchTasks(); // Fetch user's tasks
+    } else if (isAdmin && index === 1) {
+      fetchAllTasks(); // Fetch all tasks (admin only)
+    }
+  }, [index]);
+
+  useEffect(() => { }, [tasks, allTasks])
+
+  // Render task items in a FlatList
+  const renderTaskList = (tasks) => (
+    <FlatList
+      data={tasks}
+      renderItem={({ item }) => <TaskItem task={item} />}
+      keyExtractor={(item) => item._id}
+      contentContainerStyle={styles.listContainer}
     />
   );
 
-const signout = () =>{
-  const out = logout();
-  if(out){
-    navigation.push('/LoginScreen');
+  // Define scenes for the tabs
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case 'yourTasks':
+        return loading ? (
+          <ActivityIndicator size="large" style={styles.loader} />
+        ) : (
+          renderTaskList(tasks)
+        );
+      case 'allTasks':
+        return loading ? (
+          <ActivityIndicator size="large" style={styles.loader} />
+        ) : (
+          renderTaskList(allTasks)
+        );
+      default:
+        return null;
+    }
+  };
+
+
+  const signout = () => {
+    const out = logout();
+    if (out) {
+      navigation.replace('/');
+    }
   }
-}
 
   return (
     <View style={styles.container}>
-      {loading ? (
-        <ActivityIndicator size="large" style={styles.loader} />
-      ) : tasks.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No tasks assigned yet</Text>
-        </View>
+      {isAdmin ? (
+        <TabView
+          navigationState={{ index, routes }}
+          renderScene={renderScene}
+          onIndexChange={setIndex}
+          initialLayout={{ width: layout.width }}
+          renderTabBar={(props) => (
+            <TabBar {...props} style={styles.tabBar} indicatorStyle={styles.indicator} />
+          )}
+        />
       ) : (
-        <FlatList
-          data={tasks}
-          renderItem={renderItem}
-          keyExtractor={item => item._id}
-          contentContainerStyle={styles.listContainer}
-          refreshing={loading}
-          onRefresh={fetchTasks}
-        />
+        loading ? (
+          <ActivityIndicator size="large" style={styles.loader} />
+        ) : tasks.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No tasks assigned yet</Text>
+          </View>
+        ) : (
+          renderTaskList(tasks)
+        )
       )}
 
-      {isAdmin && (
+      <View style={styles.fabContainer}>
+        {isAdmin && (
+          <FAB
+            style={styles.fab}
+            icon="plus"
+            onPress={() => navigation.navigate('/AddTask')}
+          />
+        )}
+        {isAdmin && (
+          <FAB
+            style={styles.users}
+            icon="account-group"
+            onPress={() => navigation.navigate('/UserManagementScreen')}
+          />
+        )}
         <FAB
-          style={styles.fab}
-          icon="plus"
-          onPress={() => navigation.navigate('/AddTask')}
+          style={styles.logout}
+          icon="logout"
+          onPress={signout}
         />
-      )}
-
-      <FAB
-        style={styles.logout}
-        icon="logout"
-        onPress={signout}
-      />
+      </View>
     </View>
   );
 };
@@ -85,6 +134,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  tabBar: {
+    backgroundColor: '#6200ee',
+  },
+  indicator: {
+    backgroundColor: '#ffffff',
+  },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -94,28 +149,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#888',
   },
+  fabContainer: {
+    display: 'flex',
+    justifyContent: "space-between",
+    alignContent: 'center',
+    flexDirection: "row",
+    marginHorizontal: "5%",
+    marginBottom: "5%"
+  },
   fab: {
-    position: 'absolute',
-    margin: 16,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#aaa',
+    width: 55
+  },
+  users: {
+    width: 55
   },
   logout: {
-    position: 'absolute',
-    margin: 16,
-    left: 0,
-    bottom: 0,
-    backgroundColor: '#aaa',
-  },
-  addButton: {
-    // position: 'absolute',
-    marginHorizontal: 50,
-    marginVertical: 25,
-    left: 0,
-    top: 0,
-    backgroundColor: '#6200ee',
+    width: 55
   }
+
 });
 
 export default HomeScreen;

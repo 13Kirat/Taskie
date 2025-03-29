@@ -18,9 +18,11 @@ import {
   Paragraph
 } from 'react-native-paper';
 import { AuthContext } from './context/AuthContext';
-import api from './services/api';
+import { api } from './services/api';
+import authStorage from './services/authStorage';
 
 const UserManagementScreen = () => {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
@@ -38,10 +40,15 @@ const UserManagementScreen = () => {
   const fetchUsers = async () => {
     setFetchingUsers(true);
     try {
-      const res = await api.get('/api/users/getAll');
-      setUsers(res.data);
+      const token = await authStorage.getToken();
+      if (token) {
+        const res = await api.get('/api/users/getAll', {
+          headers: { 'x-auth-token': token },
+        });
+        setUsers(res.data);
+      }
     } catch (error) {
-      // console.error('Error fetching users', error);
+      console.error('Error fetching users', error);
       Alert.alert('Error', 'Failed to fetch users');
     } finally {
       setFetchingUsers(false);
@@ -62,9 +69,10 @@ const UserManagementScreen = () => {
 
     setLoading(true);
     try {
-      const result = await registerUser({ email, password, isAdmin });
+      const result = await registerUser({ username, email, password, isAdmin });
       if (result.success) {
         Alert.alert('Success', 'User registered successfully!');
+        setUsername('');
         setEmail('');
         setPassword('');
         setIsAdmin(false);
@@ -90,6 +98,16 @@ const UserManagementScreen = () => {
       <Card style={styles.card}>
         <Card.Content>
           <Title style={styles.title}>Register New User</Title>
+
+          <TextInput
+            label="Username"
+            value={username}
+            onChangeText={setUsername}
+            mode="outlined"
+            style={styles.input}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
 
           <TextInput
             label="Email"

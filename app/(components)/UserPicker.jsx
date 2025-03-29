@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   list: {
-    maxHeight: 200,
+    maxHeight: 350,
   },
   userItem: {
     backgroundColor: '#fff',
