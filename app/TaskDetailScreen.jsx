@@ -339,7 +339,28 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 16,
-  }
+  },
+  button: {
+    marginBottom: 16,
+  },
+  completeButton: { // Newly added style
+    backgroundColor: '#4CAF50', // Green color for completion button
+    marginTop: 16,
+  },
+  imagesTitle: {
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  imageScrollView: {
+    flexDirection: 'row',
+    marginVertical: 8,
+  },
+  selectedImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    marginRight: 8,
+  },
 });
 
 export default TaskDetailScreen;
